@@ -1,16 +1,19 @@
 import config from "../config.json";
 import styled from "styled-components";
 import {CSSReset} from "../src/components/CSSRReset";
-import Menu from "../src/components/Menu";
+import Index from "../src/components/Menu";
 import {StyledTimeline} from "../src/components/Timeline";
+import React from "react";
 
 function HomePage() {
     // const mensagem = "Bem vindo ao AluraTube!";
     const estilosDaHomePage = {
         // backgroundColor: "red"
     };
+    const [valorDoFiltro, setValorDoFiltro] = React.useState(""); /* re-executar as funcções para mudar a pagina e salvar numa variavel valro da busca */
+    // const valorDoFiltro = "Angular";
 
-    console.log(config.playlists);
+   // console.log(config.playlists);
 
     return (
         <>
@@ -22,10 +25,11 @@ function HomePage() {
                 flex: 1,
                 // backgroundColor: "red",
             }}>
-                <Menu/>
+                /* Prop Drilling */
+                <Index valorDoFiltro={valorDoFiltro} setValorDoFiltro={setValorDoFiltro}/>
                 <Header/>
-                <Timeline playlists={config.playlists}>
-
+                <Timeline searchValue={valorDoFiltro} playlists={config.playlists}>
+                    Conteúdo
                 </Timeline>
             </div>
         </>
@@ -50,16 +54,18 @@ img{
 }
 
 .user-info{
-margin-top: 50px;
 display: flex; align-items:center; width: 100%; padding: 16px 32px; gap:18px ;
 }
 
 `;
-
+const StyleBanner = styled.div`
+background-color: blue; height: 230px;
+background-image: url(${({bg}) => bg });
+`;
 function Header() {
     return (
         <StyleHeader>
-            {/*<img src="banner"/>*/}
+           <StyleBanner bg={config.bg} />
             <section className="user-info">
                 <img src={`https://github.com/${config.github}.png`}/>
                 <div>
@@ -71,8 +77,8 @@ function Header() {
     )
 }
 
-function Timeline(props) {
-    console.log("Dentro do componente", props.playlists);
+function Timeline({searchValue, ...props}) {
+   // console.log("Dentro do componente", props.playlists);
     const playlistNames = Object.keys(props.playlists);
 
     return (
@@ -80,19 +86,24 @@ function Timeline(props) {
             {playlistNames.map(playlistName => {
                 const videos = props.playlists[playlistName];
                 return (
-                    <section>
+                    <section key={playlistName}>
                         <h2>{playlistName}</h2>
                         <div>
-                            {videos.map((video) => {
-                                return (
-                                    <a href={video.url}>
-                                        <img src={video.thumb}/>
-                                        <span>
+                            {videos.filter((video) => {
+                                const titleNormalized = video.title.toLowerCase();
+                                const searchValueNormalized = searchValue.toLowerCase();
+                                return titleNormalized.includes(searchValueNormalized)
+                            })
+                                .map((video) => {
+                                    return (
+                                        <a key={video.url} href={video.url}>
+                                            <img src={video.thumb}/>
+                                            <span>
                         {video.title}
                             </span>
-                                    </a>
-                                )
-                            })}
+                                        </a>
+                                    )
+                                })}
                         </div>
                     </section>
                 )
