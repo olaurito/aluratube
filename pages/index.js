@@ -3,16 +3,40 @@ import styled from "styled-components";
 import Index from "../src/components/Menu";
 import {StyledTimeline} from "../src/components/Timeline";
 import React from "react";
+import {videoService} from "../src/services/videoService";
+
 
 function HomePage() {
+    const service = videoService();
     // const mensagem = "Bem vindo ao AluraTube!";
     const estilosDaHomePage = {
         // backgroundColor: "red"
     };
     const [valorDoFiltro, setValorDoFiltro] = React.useState(""); /* re-executar as funcções para mudar a pagina e salvar numa variavel valro da busca */
-    // const valorDoFiltro = "Angular";
 
-   // console.log(config.playlists);
+    /* const playlists = {
+         "jogos": [],
+     };*/
+
+    //config.playlists
+    const [playlists, setPlaylists] = React.useState({jogos: []});
+
+    React.useEffect(() => {
+
+        service.getAllVideos()
+            .then((dados) => {
+                console.log(dados.data);
+                //Forma imutavel
+                const novasPlaylists = {...playlists};
+                dados.data.forEach((video) => {
+                    if (!novasPlaylists[video.playlist]) novasPlaylists[video.playlist] = [];
+                    novasPlaylists[video.playlist]?.push(video);
+                })
+                setPlaylists(novasPlaylists);
+            });
+
+    }, []); //efeito colateral, algum dado mudar, roda o useffect
+
 
     return (
         <>
@@ -60,12 +84,13 @@ display: flex; align-items:center; width: 100%; padding: 16px 32px; gap:18px ;
 `;
 const StyleBanner = styled.div`
 background-color: blue; height: 230px;
-background-image: url(${({bg}) => bg });
+background-image: url(${({bg}) => bg});
 `;
+
 function Header() {
     return (
         <StyleHeader>
-           <StyleBanner bg={config.bg} />
+            <StyleBanner bg={config.bg}/>
             <section className="user-info">
                 <img src={`https://github.com/${config.github}.png`}/>
                 <div>
@@ -78,7 +103,7 @@ function Header() {
 }
 
 function Timeline({searchValue, ...props}) {
-   // console.log("Dentro do componente", props.playlists);
+    // console.log("Dentro do componente", props.playlists);
     const playlistNames = Object.keys(props.playlists);
 
     return (
